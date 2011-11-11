@@ -1,0 +1,11 @@
+nodes:
+  node1:
+    memory: 512
+    ip: 127.0.0.1
+
+images:
+  openwrt: /home/kamil/openwrt-x86-generic-combined-ext2.img
+  
+vms:
+  small:
+    memory: 32 

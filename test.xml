@@ -1,0 +1,30 @@
+<domain type='qemu'>
+  <name>mydomain</name>
+  <uuid>c7a5fdbd-cdaf-9455-926a-d65c16db1809</uuid>
+  <memory>32768</memory>
+  <currentMemory>32768</currentMemory>
+  <vcpu>1</vcpu>
+  <os>
+    <type arch='i686' machine='pc'>hvm</type>
+    <boot dev='hd'/>
+  </os>
+  <devices>
+    <emulator>/usr/bin/qemu-system-x86_64</emulator>
+    <disk type='file' device='disk'>
+      <!-- <driver name="qemu" type="raw" io="threads" ioeventfd="on" event_idx="off"/> -->
+      <source file='/home/kamil/openwrt-x86-generic-combined-ext2.img'/>
+      <target dev='hda' bus="ide"/>
+    </disk>
+    <controller type='ide' index='0'/>
+    
+    <interface type='network'>
+      <source network='default'/>
+      <model type='ne2k_pci'/>
+    </interface>
+    
+    <graphics type='vnc' listen="0.0.0.0" port='5900'/>
+    <console type='pty'>
+       <target port='0'/>
+     </console>
+  </devices>
+</domain>
