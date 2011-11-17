@@ -1,6 +1,5 @@
 nodes:
-  node1:
-    memory: 512
+  - memory: 512
     ip: 127.0.0.1
 
 images:
@@ -8,4 +7,8 @@ images:
   
 vms:
   small:
-    memory: 32 
+    memory: 32
+  medium:
+    memory: 48
+  large:
+    memory: 64
