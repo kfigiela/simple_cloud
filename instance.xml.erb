@@ -1,7 +1,7 @@
 <domain type='qemu'>
-  <name>mydomain3</name>
-  <memory>32768</memory>
-  <currentMemory>32768</currentMemory>
+  <name>name<%=instance.id %></name>
+  <memory><%=instance.memory*1024%></memory>
+  <currentMemory><%=instance.memory*1024%></currentMemory>
   <vcpu>1</vcpu>
   <os>
     <type arch='i686' machine='pc'>hvm</type>
@@ -11,7 +11,7 @@
     <emulator>/usr/bin/qemu-system-x86_64</emulator>
     <disk type='file' device='disk'>
       <!-- <driver name="qemu" type="raw" io="threads" ioeventfd="on" event_idx="off"/> -->
-      <source file='/home/kamil/openwrt-x86-generic-combined-ext2.img'/>
+      <source file='<%=instance.image_file %>'/>
       <target dev='hda' bus="ide"/>
     </disk>
     <controller type='ide' index='0'/>

@@ -1,17 +1,25 @@
-require 'json'
+# encoding: utf-8
+# require 'json'
 require 'ostruct'
 require 'libvirt'
+require 'erb'
 require 'xmlsimple'
+require 'net/sftp'
 
 class SimpleCloud
   attr_reader :instances
   attr_reader :images
   
+  def assign_serial
+    @serial +=1 
+    @serial
+  end
+  
   def initialize(config)
     @images = config['images']
     @instances = {}
     @nodes = config['nodes'].map { |n| OpenStruct.new n }
-    
+    @serial = 0
     @nodes.each do |node|
       node.free_memory = node.memory
       node.instances = []
@@ -24,20 +32,30 @@ class SimpleCloud
     
     raise ArgumentError("Not enough memory") if node.nil?
     
-    xml = "TODO"
+    xml = ERB.new File.read("instance.xml.erb")
     
     
     node.free_memory -= memory
-    virt_instance = node.conn.create_domain_linux(xml)
+
+    
+    # TODO copy image file
+    
     
     instance = OpenStruct.new
-    instance.inst = virt_instance
+    instance.inst
     instance.node = node
     instance.memory = memory
     instance.image = image
-    instance.id = "#{node.ip}/#{virt_instance.id}"
+    instance.id = "%08d" % assign_serial    
     
-    instance.mac = (XmlSimple.xml_in x.xml_desc)['devices'][0]['interface'][0]['mac'][0]['address']
+
+    instance.image_file = node.imagepath + instance.id    
+    Net::SFTP.start(node.ip, 'root') do |sftp|
+      sftp.upload!(@images[image], instance.image_file)
+    end
+
+    instance.inst = node.connection.create_domain_linux(xml.result(binding))
+    instance.mac = (XmlSimple.xml_in instance.inst.xml_desc)['devices'][0]['interface'][0]['mac'][0]['address']
     
     node.instances << instance
     @instances[instance.id] = instance
@@ -49,7 +67,12 @@ class SimpleCloud
     instance = @instances[instance_id]
     instance.inst.destroy
     instance.node.free_memory += instance.memory
-    instance.node.instances -= instance    
+    instance.node.instances -= [instance]
     @instances.delete(instance_id)
+    
+    Net::SFTP.start(instance.node.ip, 'root') do |sftp|
+      sftp.remove!(instance.image_file)
+    end
+    
   end
 end
