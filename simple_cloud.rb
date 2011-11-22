@@ -23,7 +23,7 @@ class SimpleCloud
     @nodes.each do |node|
       node.free_memory = node.memory
       node.instances = []
-      node.connection = Libvirt::open("qemu+ssh://#{node.ip}/system")
+      node.connection = Libvirt::open("qemu+ssh://root@#{node.ip}/system")
     end    
   end
   
