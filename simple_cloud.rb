@@ -5,9 +5,9 @@ require 'libvirt'
 require 'erb'
 require 'xmlsimple'
 require 'net/sftp'
+require 'net/ssh'
 
 class SimpleCloud
-  attr_reader :instances
   attr_reader :images
   
   def assign_serial
@@ -36,10 +36,6 @@ class SimpleCloud
     
     
     node.free_memory -= memory
-
-    
-    # TODO copy image file
-    
     
     instance = OpenStruct.new
     instance.inst
@@ -56,11 +52,25 @@ class SimpleCloud
 
     instance.inst = node.connection.create_domain_linux(xml.result(binding))
     instance.mac = (XmlSimple.xml_in instance.inst.xml_desc)['devices'][0]['interface'][0]['mac'][0]['address']
+    instance.ip = nil
     
     node.instances << instance
     @instances[instance.id] = instance
     
     instance.id
+  end
+  
+  def instance_ip instance
+    if instance.ip.nil? 
+      Net::SSH.start(instance.node.ip, 'root') do |ssh|
+        arp = ssh.exec!('arp -an')
+        matches = arp.match Regexp.new '\((\d+\.\d+\.\d+.\d+)\) at (%s)' % instance.mac
+        instance.ip = matches[1] unless matches.nil?
+      end
+
+    end
+    
+    instance.ip
   end
   
   def destroy(instance_id)
@@ -73,6 +83,18 @@ class SimpleCloud
     Net::SFTP.start(instance.node.ip, 'root') do |sftp|
       sftp.remove!(instance.image_file)
     end
-    
   end
+  
+  def instances
+    @instances.values.map do |instance|
+      {
+        image: instance.image,
+        memory: instance.memory,
+        id: instance.id,
+        mac: instance.mac,
+        ip: (instance_ip instance)
+      }
+    end
+  end
+  
 end

@@ -8,7 +8,7 @@
     <boot dev='hd'/>
   </os>
   <devices>
-    <emulator>/usr/bin/qemu-system-x86_64</emulator>
+    <emulator>/usr/bin/qemu-kvm</emulator>
     <disk type='file' device='disk'>
       <!-- <driver name="qemu" type="raw" io="threads" ioeventfd="on" event_idx="off"/> -->
       <source file='<%=instance.image_file %>'/>
