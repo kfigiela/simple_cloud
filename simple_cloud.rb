@@ -7,6 +7,22 @@ require 'xmlsimple'
 require 'net/sftp'
 require 'net/ssh'
 
+class Node < OpenStruct
+  def connection
+    connection = Libvirt::open("qemu+ssh://#{self.ip}/system")
+    yield connection
+    connection.close
+  end
+end
+
+class Instance < OpenStruct
+  def inst
+    self.node.connection do |c|
+      yield (c.lookup_domain_by_name self.id)
+    end
+  end
+end
+
 class SimpleCloud
   attr_reader :images
   
@@ -18,12 +34,11 @@ class SimpleCloud
   def initialize(config)
     @images = config['images']
     @instances = {}
-    @nodes = config['nodes'].map { |n| OpenStruct.new n }
+    @nodes = config['nodes'].map { |n| Node.new n }
     @serial = 0
     @nodes.each do |node|
       node.free_memory = node.memory
       node.instances = []
-      node.connection = Libvirt::open("qemu+ssh://#{node.ip}/system")
     end    
   end
   
@@ -37,12 +52,11 @@ class SimpleCloud
     
     node.free_memory -= memory
     
-    instance = OpenStruct.new
-    instance.inst
+    instance = Instance.new
     instance.node = node
     instance.memory = memory
     instance.image = image
-    instance.id = "%08d" % assign_serial    
+    instance.id = "i%x" % assign_serial    
     
 
     instance.image_file = node.imagepath + instance.id    
@@ -50,8 +64,10 @@ class SimpleCloud
       sftp.upload!(@images[image], instance.image_file)
     end
 
-    instance.inst = node.connection.create_domain_linux(xml.result(binding))
-    instance.mac = (XmlSimple.xml_in instance.inst.xml_desc)['devices'][0]['interface'][0]['mac'][0]['address']
+    node.connection do |connection| 
+      inst = connection.create_domain_linux(xml.result(binding))
+      instance.mac = (XmlSimple.xml_in inst.xml_desc)['devices'][0]['interface'][0]['mac'][0]['address']
+    end
     instance.ip = nil
     
     node.instances << instance
@@ -75,7 +91,7 @@ class SimpleCloud
   
   def destroy(instance_id)
     instance = @instances[instance_id]
-    instance.inst.destroy
+    instance.inst { |inst| inst.destroy }
     instance.node.free_memory += instance.memory
     instance.node.instances -= [instance]
     @instances.delete(instance_id)
