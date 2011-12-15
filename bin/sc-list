@@ -1,0 +1,21 @@
+#!/usr/bin/env ruby
+require 'rest-client'
+require 'json'
+
+ENV['SC_URL'] = 'http://127.0.0.1:4567/' if ENV['SC_URL'].nil?
+
+client = RestClient::Resource.new ENV['SC_URL']
+
+begin
+  response = client['instances'].get
+
+
+  puts "Running instances"
+  puts "%8s    %8s    %8s         %12s    %16s" % ['Id', 'Image', 'Memory', 'MAC', 'IP']
+  puts "-------------------------------------------------------------------------"
+  JSON.parse(response).each do |instance|
+    puts "%8s    %8s    %4d MiB    %12s    %16s" % [instance["id"], instance["image"], instance["memory"], instance["mac"], instance["ip"]]
+  end
+rescue Exception => e
+  puts "Error: #{e.message}"
+end

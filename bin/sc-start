@@ -1,0 +1,24 @@
+#!/usr/bin/env ruby
+require 'rest-client'
+require 'json'
+
+if ARGV.length != 2
+  puts "usage: sc-start image memory"
+  exit
+end
+
+ENV['SC_URL'] = 'http://127.0.0.1:4567/' if ENV['SC_URL'].nil?
+
+client = RestClient::Resource.new ENV['SC_URL']
+
+begin
+  response = client['instance'].post image: ARGV[0], memory: ARGV[1]
+  json = JSON.parse(response)
+  unless json['id'].nil?
+    puts "instance: #{json['id']}"
+  else
+    puts "instance: ERROR"
+  end
+rescue Exception => e
+  puts "Error: #{e.message}"
+end

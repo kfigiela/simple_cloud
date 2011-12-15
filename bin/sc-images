@@ -1,0 +1,20 @@
+#!/usr/bin/env ruby
+require 'rest-client'
+require 'json'
+
+ENV['SC_URL'] = 'http://127.0.0.1:4567/' if ENV['SC_URL'].nil?
+
+client = RestClient::Resource.new ENV['SC_URL']
+
+begin
+  response = client['images'].get
+
+
+  puts "Registered images"
+  puts "-----------------"
+  JSON.parse(response).each do |image|
+    puts image
+  end
+rescue Exception => e
+  puts "Error: #{e.message}"
+end

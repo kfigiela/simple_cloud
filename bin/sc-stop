@@ -1,0 +1,26 @@
+#!/usr/bin/env ruby
+require 'rest-client'
+require 'json'
+
+if ARGV.length != 1
+  puts "usage: sc-stop instance"
+  exit
+end
+
+ENV['SC_URL'] = 'http://127.0.0.1:4567/' if ENV['SC_URL'].nil?
+
+client = RestClient::Resource.new ENV['SC_URL']
+
+begin
+  response = client['instance/'+ARGV[0]].delete
+  json = JSON.parse(response)
+  if json['status'] == 1
+    puts "OK"
+  else
+    puts "ERROR"
+    exit 1
+  end
+rescue Exception => e
+  puts "Error: #{e.message}"
+  exit 1
+end
