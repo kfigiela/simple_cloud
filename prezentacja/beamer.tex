@@ -1,0 +1,115 @@
+\documentclass{beamer}
+\usetheme{Warsaw}
+\usepackage[utf8]{inputenc} 
+\usepackage[MeX]{polski}
+
+% \usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{mathtools}
+
+\setlength{\parindent}{0in} 
+\setlength{\parskip}{10pt}
+
+\title[\insertframenumber/\inserttotalframenumber]{Analiza możliwości KVM}
+\institute[AGH]{AGH University of Science and Technology, Kraków}
+
+\author[K. Figiela, M. Wielgus]{Kamil Figiela \and Małgorzata Wielgus}
+\date{December 16, 2011}
+
+
+\begin{document}
+
+\begin{frame}[plain]
+  \titlepage
+\end{frame}
+
+\section{Wirtualizacja}
+
+\begin{frame}{Zalety}
+  \begin{itemize}
+    \item Konsolidacja i dynamiczny przydział zasobów
+    \item Niezależność od sprzętu
+    \item Separacja uprawnień
+    \item Wsprarcie dla starszych aplikacji
+    \item Ułatwione zarządzanie
+  \end{itemize}
+\end{frame}
+  
+\begin{frame}{Wady}
+  \begin{itemize}
+    \item Degradacja wydajności
+    \item Brak bezpośredniego dostępu do sprzętu
+  \end{itemize}
+\end{frame}
+
+\section{KVM}
+\begin{frame}{KVM}
+  \begin{itemize}
+    \item Moduł jądra Linuksa
+    \item Backend dla qemu
+    \item Wymaga Intel VT-x lub AMD-V
+    \item Wirtualizacja HVM (sprzętowa)    
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}{Funkcje}
+  \begin{itemize}
+    \item Emulacja pełnej maszyny wraz z BIOS
+      \begin{itemize}
+        \item SMP
+        \item PAE
+        \item x86/x86\_64
+      \end{itemize}
+    \item Emulacja urządzeń
+      \begin{itemize}
+        \item HDD, CDROM
+        \item Karta sieciowa
+        \item USB, port szeregowy, równoległy
+        \item karta graficzna
+        \item karta dźwiękowa
+      \end{itemize}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Funkcje cd}
+  \begin{itemize}
+    \item Zarządzanie pamięcią
+      \begin{itemize}
+        \item Alokowanie on-demand
+        \item Baloon driver (tylko linux)
+        \item KSM (Kernel Sharedpage Merging)
+      \end{itemize}
+    \item Migracja online
+  \end{itemize}
+\end{frame}
+
+
+\section{Cloud computing}
+\begin{frame}{Wstęp}
+  \begin{itemize}
+    \item Model biznesowy
+    \item Rozważana architektura IaaS
+    \item W ramach projektu utworzono prosty stos do zarządzania chmurą
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Zastosowania}
+  \begin{itemize}
+    \item Dynamiczne skalowanie aplikacji WWW
+    \item Obliczenia naukowo–techniczne
+  \end{itemize}
+\end{frame}
+
+\section{Implementacja}
+\begin{frame}{Wykorzystane technologie}
+  \begin{itemize}
+    \item Ruby
+    \item libvirt
+    \item SSH, SFTP
+    \item HTTP REST, JSON
+  \end{itemize}
+\end{frame}
+
+\end{document}  
